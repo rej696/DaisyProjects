@@ -38,7 +38,7 @@ static const float KNOB_MAX = powf(2.0f, ANALOG_RESOLUTION) - 1.0f;
 extern "C" {
 static scale_t scale;
 static terminal_t term;
-static arp_t arp; /* FIXME this C static opaque structs */
+arp_handle_t arp = arp_get(); /* FIXME this C static opaque structs */
 }
 
 static Metro metro;

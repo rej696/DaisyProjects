@@ -8,7 +8,8 @@ extern "C"
 
 #include <stdint.h>
 
-    typedef struct arp *arp_t;
+    typedef struct arp arp_t;
+    typedef struct arp *arp_handle_t;
 
     typedef enum arp_direction
     {
@@ -16,6 +17,7 @@ extern "C"
         ARP_DIR_REV,
     } arp_direction_t;
 
+    arp_handle_t arp_get(void);
     void arp_init(arp_t *self);
     void arp_note_on(arp_t *self, uint8_t num, uint8_t vel);
     void arp_note_off(arp_t *self, uint8_t num);

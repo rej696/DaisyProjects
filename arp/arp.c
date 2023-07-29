@@ -36,6 +36,8 @@ struct arp
     void (*note_off_cb)(uint8_t);
 };
 
+arp_t g_arp;
+
 /*****
  * Static Functions
  *****/
@@ -49,6 +51,10 @@ static int     arp_rand_int(int min, int max);
 /*****
  * Definitions
  *****/
+arp_handle_t arp_get() {
+    return &g_arp;
+}
+
 void arp_init(arp_t *self)
 {
     self->note_length   = 0;
