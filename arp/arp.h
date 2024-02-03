@@ -5,11 +5,8 @@
 extern "C"
 {
 #endif
-
+#include "arp_config.h"
 #include <stdint.h>
-
-    typedef struct arp arp_t;
-    typedef struct arp *arp_handle_t;
 
     typedef enum arp_direction
     {
@@ -17,7 +14,29 @@ extern "C"
         ARP_DIR_REV,
     } arp_direction_t;
 
-    arp_handle_t arp_get(void);
+    struct arp_note
+    {
+        uint8_t num;
+        uint8_t vel;
+        uint8_t next;
+        uint8_t prev;
+    };
+
+    typedef struct arp
+    {
+        struct arp_note notes[NOTES_COUNT + 1];
+        uint8_t         input_order[NOTES_COUNT];
+        arp_direction_t direction;
+        float           rand_chance;
+        uint8_t         note_length;
+        uint8_t         bottom_idx;
+        uint8_t         current_idx;
+        uint8_t         pulse_counter;
+        uint8_t         size;
+        void (*note_on_cb)(uint8_t, uint8_t);
+        void (*note_off_cb)(uint8_t);
+    } arp_t;
+
     void arp_init(arp_t *self);
     void arp_note_on(arp_t *self, uint8_t num, uint8_t vel);
     void arp_note_off(arp_t *self, uint8_t num);

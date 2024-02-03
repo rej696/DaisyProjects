@@ -11,50 +11,18 @@
 #define ARP_UNLINKED 0xFD
 
 /*****
- * Private Types
- *****/
-struct arp_note
-{
-    uint8_t num;
-    uint8_t vel;
-    uint8_t next;
-    uint8_t prev;
-};
-
-struct arp
-{
-    struct arp_note notes[NOTES_COUNT + 1];
-    uint8_t         input_order[NOTES_COUNT];
-    arp_direction_t direction;
-    float           rand_chance;
-    uint8_t         note_length;
-    uint8_t         bottom_idx;
-    uint8_t         current_idx;
-    uint8_t         pulse_counter;
-    uint8_t         size;
-    void (*note_on_cb)(uint8_t, uint8_t);
-    void (*note_off_cb)(uint8_t);
-};
-
-arp_t g_arp;
-
-/*****
  * Static Functions
  *****/
 static void    arp_remove_note(arp_t *self, uint8_t idx);
 static uint8_t arp_next_note_idx(arp_t *self);
 static uint8_t arp_prev_note_idx(arp_t *self);
-static uint8_t arp_calc_note_len(arp_t *self);
+static void    arp_calc_note_len(arp_t *self);
 static float   arp_rand_float(float min, float max);
 static int     arp_rand_int(int min, int max);
 
 /*****
  * Definitions
  *****/
-arp_handle_t arp_get() {
-    return &g_arp;
-}
-
 void arp_init(arp_t *self)
 {
     self->note_length   = 0;
@@ -213,5 +181,45 @@ void arp_clear(arp_t *self)
  *****/
 static void arp_remove_note(arp_t *self, uint8_t idx)
 {
-    // TODO
+    self->note_off_cb(self->notes[idx].num);
+    self->notes[self->notes[idx].prev].next = self->notes[idx].next;
+    self->notes[self->notes[idx].prev].prev = self->notes[idx].prev;
+    if(idx == self->bottom_idx)
+    {
+        self->bottom_idx = self->notes[idx].next;
+    }
+
+    self->notes[idx].num  = ARP_EMPTY;
+    self->notes[idx].next = ARP_UNLINKED;
+    self->notes[idx].prev = ARP_UNLINKED;
+
+    for(uint8_t i = 0; i < self->size; i++)
+    {
+        if(self->input_order[i] == idx)
+        {
+            while(i < self->size)
+            {
+                self->input_order[i] = self->input_order[i + 1];
+                i++;
+            }
+        }
+    }
+    self->size--;
+}
+
+static uint8_t arp_next_note_idx(arp_t *self)
+{
+    uint8_t note_idx = self->notes[self->current_idx].next;
+    return (note_idx == 0) ? self->notes[note_idx].next : note_idx;
+}
+
+static uint8_t arp_prev_note_idx(arp_t *self)
+{
+    uint8_t note_idx = self->notes[self->current_idx].prev;
+    return (note_idx == 0) ? self->notes[note_idx].prev : note_idx;
+}
+
+static void arp_calc_note_len(arp_t *self)
+{
+    self->note_length = (PPQN >= 24) ? (PPQN / 12) : 0;
 }
